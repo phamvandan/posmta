@@ -1,0 +1,41 @@
+<launch>
+    <!-- mpu -->
+    <node pkg="dira_mpu9250_controller" type="dira_mpu9250_controller_node" name="dira_mpu9250_controller" output="screen">
+        <param name="calibration_file_path" value="$(find dira_mpu9250_controller)/config"/>
+        <param name="calibration_file_name" value="RTIMULib" />
+        <param name="frame_id" value="imu"/>
+    </node>
+
+
+    <!-- pca -->
+	<node pkg="dira_pca9685_controller" type="dira_pca9685_controller_node" name="pca1">
+		<param name="/pwm_pca9685" value="95"/>
+	</node>
+
+
+    <!-- peripheral -->
+    <!-- Default is 0x37 == 63-DEC-->
+	<arg name="lcd_i2c_adr" default="3f"/>
+	<!-- Start dira_lcd_controller_node -->
+	<!-- <node name="dira_peripheral_controller_node" pkg="dira_peripheral_controller" type="dira_peripheral_controller_node" output="screen" respawn="true"> -->
+	<node name="dira_peripheral_controller_node" pkg="dira_peripheral_controller" type="dira_peripheral_controller_node" output="screen">
+	    <param name="lcd_i2c_adr" value="$(arg lcd_i2c_adr)" type="str"/>
+	</node>
+
+
+    <!-- lidar -->
+    <node name="rplidarNode" pkg="rplidar_ros"  type="rplidarNode" output="screen">
+        <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <param name="frame_id"            type="string" value="laser"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+    </node>
+
+
+    <!-- Disable bond topics by default -->
+    <arg name="respawn" default="false" />
+
+    <!-- Worker threads for the nodelet manager -->
+    <node name="optimal" pkg="mtapos" type="optimal.py" output="screen"/> 
+</launch>
